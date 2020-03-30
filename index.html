@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/table.css">
+    <title>CSV to JSON Converter</title>
+    <style>
+        #drop {
+            border: 5px solid #3a9c8d;
+            margin-bottom: 15px;
+            padding: 15px;
+            box-shadow: -3px -3px 14px 0px black;
+        }
+    </style>
+</head>
+<body>
+<div class="container" style="margin-top: 5%">
+    <br>
+    <h1>CSV to JSON </h1>
+    <p>Converts your csv file into a json file.</p>
+    <div id="drop">
+        <p>Find the file you want to convert to json on your computer or you can drag and drop the file over the shaded
+            box</p>
+        <br>
+        <br>
+        <button class="btn btn-outline-secondary" onclick="document.querySelector('input').click()">Find your CSV
+        </button>
+        <input style="visibility: collapse; width: 0px;" type="file" onchange="upload(this.files[0])">
+    </div>
+
+    <div id="output"></div>
+
+</div>
+<footer id="sticky-footer" class="py-4 text-white-50" >
+    <div class="container text-center">
+        <small>Copyright &copy; Your Website</small>
+    </div>
+</footer>
+
+
+<script type="text/javascript">
+
+    var output = document.getElementById("output");
+
+
+    //var csv is the CSV file with headers
+    function csvJSON(csv) {
+
+        var lines = csv.split("\n");
+
+        var result = [];
+
+        var headers = lines[0].split(";");
+
+        for (var i = 1; i < lines.length; i++) {
+
+            var obj = {};
+            var currentline = lines[i].split(";");
+
+            for (var j = 0; j < headers.length; j++) {
+                obj[headers[j]] = currentline[j];
+            }
+
+            result.push(obj);
+
+        }
+
+        //return result; //JavaScript object
+        return JSON.stringify(result); //JSON
+    }
+
+
+    /* Drag drop stuff */
+    window.ondragover = function (e) {
+        e.preventDefault()
+    };
+    window.ondrop = function (e) {
+        e.preventDefault();
+        console.log("Reading...");
+        var length = e.dataTransfer.items.length;
+        if (length > 1) {
+            console.log("Please only drop 1 file.");
+        } else {
+            upload(e.dataTransfer.files[0]);
+        }
+    };
+
+    /* main upload function */
+    function upload(file) {
+        if (file.type.match(/text\/csv/) || file.type.match(/vnd\.ms-excel/)) {
+            //if(file.type.match(/text\/csv/)){
+            oFReader = new FileReader();
+            oFReader.onloadend = function () {
+
+                console.log(csvJSON(this.result));
+
+                var json = csvJSON(this.result);
+
+                var blob = new Blob([json], {type: 'application/json'});
+                var url = URL.createObjectURL(blob);
+                output.innerHTML = '<a href="' + url + '">JSON file</a>';
+
+
+            };
+            oFReader.readAsText(file);
+        } else {
+            console.log("This file does not seem to be a CSV.");
+        }
+    }
+</script>
+</body>
+</html>
